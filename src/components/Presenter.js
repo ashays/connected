@@ -1,5 +1,6 @@
 import React from 'react';
 import {withRouter } from "react-router-dom";
+import './Presenter.css';
 
 class Presenter extends React.Component {
     constructor(props) {
@@ -54,8 +55,24 @@ class Presenter extends React.Component {
   }
 
     render() {
+        if (this.state.participants) {
+            return (
+                <div className="slide slideB">
+                    <main>
+                        <h1>Nice! Wasn’t that easy?</h1>
+                        <div className="subtitle">Join on another device for even more fun, or choose a demo bellow</div>
+                    </main>
+                </div>
+            );
+        }
         return (
-            <div>Hop on over to {window.location.href + "join/" + this.props.id}.</div>
+            <div className="slide">
+                <main>
+                    <h1>Let’s make presentations smarter, more engaging, and interactive</h1>
+                    <div className="subtitle">Hop on your phone and give it a try—</div>
+                    <div className="link">{window.location.href + "join/" + this.props.id}</div>
+                </main>
+            </div>
         );
     }
 }
