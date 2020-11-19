@@ -1,7 +1,7 @@
 import React from 'react';
-import { Switch, Route, Redirect, withRouter } from "react-router-dom";
+import {withRouter } from "react-router-dom";
 
-class Lobby extends React.Component {
+class Participant extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -43,10 +43,8 @@ class Lobby extends React.Component {
     }
 
     render() {
-        return (
-            <div>You're in a room!</div>
-        );
+        return null;
     }
 }
 
-export default withRouter(Lobby);
+export default withRouter(Participant);
