@@ -5,6 +5,7 @@
     color: #fff;
     text-align: center;
     padding: 100px 0;
+    transition: all .3s;
 }
 
 .slideB {
@@ -12,25 +13,24 @@
 }
 
 main {
-    width: 800px;
+    width: 500px;
     margin: 0 auto;
 }
 
-.subtitle {
-    font-size: 36px;
+h1 {
+    font-size: 30px;
+    font-weight: 500;
 }
 
-h1 {
-    font-size: 44px;
-    font-weight: 500;
+.subtitle {
+    font-size: 24px;
 }
 
 .link {
     display: inline-block;
-    font-size: 28px;
     background: #fff;
     color: #39A0ED;
     padding: 8px 30px;
     border-radius: 25px;
-    margin: 40px 0;
+    margin-top: 24px;
 }

@@ -1,13 +1,16 @@
 import React from 'react';
-import {withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
+import Profile from './Profile';
 
 class Participant extends React.Component {
     constructor(props) {
         super(props);
+        this.updateName = this.updateName.bind(this);
+        this.state = { name: undefined };
     }
 
     componentDidMount() {
-        if (this.props.id) {
+        if (!this.state.host) {
             let conn = this.props.peer.connect(this.props.match.params.id);
             this.setupConnection(conn);
         }
@@ -17,19 +20,21 @@ class Participant extends React.Component {
 
     }
 
+    send(data) {
+        this.state.host.send(data);
+    }
+
     setupConnection(connection) {
         // When connection established
         connection.on('open', () => {
-            this.setState((state, props) => ({host: connection}));
+            this.setState((state, props) => ({ host: connection }));
         });
 
         connection.on('error', (err) => {
             console.error(err);
             // Try again
-            if (this.props.id) {
-                let conn = this.props.peer.connect(this.props.match.params.id);
-                this.setupConnection(conn);
-            }
+            let conn = this.props.peer.connect(this.props.match.params.id);
+            this.setupConnection(conn);
         });
 
         connection.on('close', () => {
@@ -42,8 +47,24 @@ class Participant extends React.Component {
         });
     }
 
+    updateName(name) {
+        this.setState({ name });
+        this.send({
+            type: "name",
+            name
+        });
+    }
+
     render() {
-        return null;
+        if (this.state.name) {
+            return (<div>Welcome {this.state.name}. Your ID is {this.props.id}</div>);
+        } else if (this.state.host) {
+            return (
+                <Profile id={this.props.id} updateName={this.updateName} />
+            );
+        } else {
+            return (<div>Loadin'</div>);
+        }
     }
 }
 
