@@ -1,11 +1,13 @@
 import React from 'react';
 import { withRouter } from "react-router-dom";
+import Toolbar from './Toolbar';
+import { LandingSlide, LobbySlide, PollSlide } from './Slides';
 import './Presenter.css';
 
 class Presenter extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { test: "hi" };
+        this.state = { mode: undefined };
     }
 
     componentDidMount() {
@@ -89,28 +91,20 @@ class Presenter extends React.Component {
 
     render() {
         if (this.state.participants) {
-            const participantsListed = Object.entries(this.state.participants).map((entry, i) => (
-                <div key={entry[0]}>{entry[1].name ? entry[1].name : "Unnamed Person " + i}</div>
-            ));
+            let slide;
+            switch (this.state.mode) {
+                // case "":
+                default:
+                    slide = (<LobbySlide participants={this.state.participants} />);
+            }
             return (
-                <div className="slide slideB">
-                    <main>
-                        <h1>Nice! Wasn’t that easy?</h1>
-                        {participantsListed}
-                        <div className="subtitle">Join on another device for even more fun, or choose a demo below</div>
-                    </main>
+                <div>
+                    {slide}
+                    <Toolbar participants={this.state.participants} />
                 </div>
             );
         }
-        return (
-            <div className="slide">
-                <main>
-                    <h1>Let’s make presentations smarter, more engaging, and interactive</h1>
-                    <div className="subtitle">Hop on your phone and give it a try—</div>
-                    <div className="link">{window.location.href + "join/" + this.props.id}</div>
-                </main>
-            </div>
-        );
+        return (<LandingSlide id={this.props.id} />);
     }
 }
 
