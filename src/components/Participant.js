@@ -1,6 +1,7 @@
 import React from 'react';
 import { withRouter } from "react-router-dom";
 import Profile from './Profile';
+import { LoadingSlide } from './Slides';
 
 class Participant extends React.Component {
     constructor(props) {
@@ -63,7 +64,7 @@ class Participant extends React.Component {
                 <Profile id={this.props.id} updateName={this.updateName} />
             );
         } else {
-            return (<div>Loadin'</div>);
+            return (<LoadingSlide message="Connecting to host"></LoadingSlide>);
         }
     }
 }

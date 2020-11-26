@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import Presenter from './components/Presenter';
 import Participant from './components/Participant';
+import { LoadingSlide } from './components/Slides';
 import Peer from 'peerjs';
 import './App.css';
 
@@ -48,7 +49,7 @@ class App extends React.Component {
         </Router>
       );  
     }
-    return (<div>Loading</div>);
+    return (<LoadingSlide message="Loading session" />);
   }
 }
 
