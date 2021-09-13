@@ -1,111 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { withRouter } from "react-router-dom";
 import Toolbar from './Toolbar';
-import { LandingSlide, LobbySlide, PollSlide } from './Slides';
+import { LandingSlide, LobbySlide } from './Slides';
+import { participantManager } from './ConnectionHelpers';
 import './Presenter.css';
 
-class Presenter extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { mode: undefined };
-    }
+function Presenter(props) {
+  const [mode, setMode] = useState();
+  const [participants, updateParticipants] = useReducer(participantManager);
 
-    componentDidMount() {
-        if (this.props.id) {
-            this.props.peer.on('connection', (conn) => {
-                this.setupParticipant(conn);
-            });
+  useEffect(() => {
+    props.peer.on('connection', (conn) => {
+      conn.on('open', () => {
+        updateParticipants({type: 'add', connection: conn})
+      });
+    
+      conn.on('close', () => {
+        updateParticipants({type: 'remove', id: conn.peer})
+      });
+
+      conn.on('error', (err) => {
+        console.error(err);
+      });
+
+      conn.on('data', (data) => {
+        console.log("Received ", data);
+        console.log("From ", conn.peer);
+        if (data.type === 'name') {
+          updateParticipants({type: 'rename', id: conn.peer, name: data.name})
         }
+      });
+    });
+  }, [props.peer]);
+
+  if (participants) {
+    let slide;
+    switch (mode) {
+      // case "":
+      default:
+        slide = (<LobbySlide participants={participants} />);
     }
-
-    componentDidUpdate(prevProps) {
-
-    }
-
-
-    setupParticipant(connection) {
-        // When connection established
-        connection.on('open', () => {
-            this.setState((state, props) => ({
-                connections: { ...state.connections, [connection.peer]: connection },
-                participants: { ...state.participants, [connection.peer]: { name: undefined } }
-            }), () => {
-                // What to do after making connection
-            });
-        });
-
-        connection.on('error', (err) => {
-            console.error(err);
-        });
-
-        connection.on('close', () => {
-            this.setState((state, props) => {
-                let connections = { ...state.connections };
-                let participants = { ...state.participants };
-                delete connections[connection.peer];
-                delete participants[connection.peer];
-                return ({ connections, participants });
-            }, () => {
-                // What to do after a connection is closed
-            });
-        });
-
-        // Receive messages
-        connection.on('data', (data) => {
-            this.receive(data, connection.peer);
-        });
-    }
-
-    receive(data, sender) {
-        switch (data.type) {
-            case "log":
-                console.log(data.message)
-                break;
-            // case "chat":
-            //     this.addToChat(data.message, sender);
-            //     break;
-            // case "announcement":
-            //     this.setState((state, props) => ({ chat: [...state.chat, { message: data.announcement }] }));
-            //     break;
-            // case "sync":
-            //     this.setState({ [data.prop]: data.data });
-            //     break;
-            // case "sound":
-            //     let tingAudio = new Audio(ting);
-            //     tingAudio.play();
-            //     break;
-            // case "redirect":
-            //     this.props.history.push(data.location);
-            //     break;
-            case "name":
-                let participants = { ...this.state.participants };
-                if (participants[sender]) {
-                    participants[sender].name = data.name;
-                    this.setState({ participants });
-                }
-                break;
-            default:
-                console.log("Received ", data);
-        }
-    }
-
-    render() {
-        if (this.state.participants) {
-            let slide;
-            switch (this.state.mode) {
-                // case "":
-                default:
-                    slide = (<LobbySlide participants={this.state.participants} />);
-            }
-            return (
-                <div>
-                    {slide}
-                    <Toolbar participants={this.state.participants} />
-                </div>
-            );
-        }
-        return (<LandingSlide id={this.props.id} />);
-    }
+    return (
+      <div>
+        {slide}
+        <Toolbar participants={participants} />
+      </div>
+    );
+  }
+  return (<LandingSlide id={props.id} />);
 }
 
 export default withRouter(Presenter);

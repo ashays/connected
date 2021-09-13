@@ -1,72 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { withRouter } from "react-router-dom";
 import Profile from './Profile';
 import { LoadingSlide } from './Slides';
+import { send, setupConnection} from './ConnectionHelpers';
 
-class Participant extends React.Component {
-    constructor(props) {
-        super(props);
-        this.updateName = this.updateName.bind(this);
-        this.state = { name: undefined };
+function Participant(props) {
+  const [host, setHost] = useState();
+  const [name, _setName] = useState(undefined);
+  const setName = (name) => {
+    _setName(name)
+    send(host, {
+      type: "name",
+      name
+    });
+  }
+
+  useEffect(() => {
+    if (!host) {
+      setupConnection(props.peer, props.match.params.id, (connection) => { setHost(connection) });
+      return (() => { host?.close(); });
     }
+  });
 
-    componentDidMount() {
-        if (!this.state.host) {
-            let conn = this.props.peer.connect(this.props.match.params.id);
-            this.setupConnection(conn);
-        }
-    }
-
-    componentDidUpdate(prevProps) {
-
-    }
-
-    send(data) {
-        this.state.host.send(data);
-    }
-
-    setupConnection(connection) {
-        // When connection established
-        connection.on('open', () => {
-            this.setState((state, props) => ({ host: connection }));
-        });
-
-        connection.on('error', (err) => {
-            console.error(err);
-            // Try again
-            let conn = this.props.peer.connect(this.props.match.params.id);
-            this.setupConnection(conn);
-        });
-
-        connection.on('close', () => {
-            // Disconnected from host
-        });
-
-        // Receive messages
-        connection.on('data', (data) => {
-            // this.receive(data, connection.peer);
-        });
-    }
-
-    updateName(name) {
-        this.setState({ name });
-        this.send({
-            type: "name",
-            name
-        });
-    }
-
-    render() {
-        if (this.state.name) {
-            return (<div>Welcome {this.state.name}. Your ID is {this.props.id}</div>);
-        } else if (this.state.host) {
-            return (
-                <Profile id={this.props.id} updateName={this.updateName} />
-            );
-        } else {
-            return (<LoadingSlide message="Connecting to host"></LoadingSlide>);
-        }
-    }
+  if (name) {
+    return (<div>Welcome {name}. Your ID is {props.id}</div>);
+  } else if (host) {
+    return (
+      <Profile id={props.id} updateName={setName} />
+    );
+  }
+  return (<LoadingSlide message="Connecting to host"></LoadingSlide>);
 }
 
 export default withRouter(Participant);
